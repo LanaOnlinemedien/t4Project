@@ -1,6 +1,11 @@
+body{
+    background-color: #FCF2F0;
+}
+
 .error-message{
     text-align: center;
     margin-top: 10px;
     color: crimson;
     font-weight: bold;
 }
+
