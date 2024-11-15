@@ -1,5 +1,11 @@
 <?php
 session_start();
+
+require_once "../controller/dbCon.php";
+global $conBooks;
+
+$pdo = "SELECT * FROM books";
+$all_books = $conBooks -> query($pdo);
 ?>
 
 <html lang="en">
@@ -71,6 +77,59 @@ session_start();
                 </ul>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- output books -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <!-- wrapper book output -->
+        <?php
+            while($row = $all_books -> fetch(PDO::FETCH_BOTH)){
+        ?>
+        <div class="col-5">
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-3">
+                        <img id="imageCover" src="cover/<?php echo $row['cover'] ?>" class="img-fluid rounded-start h-100" alt="cover" style="object-fit: cover">
+                    </div>
+                    <div class="col-9">
+                        <div class="card-body">
+                            <h5 class="card-title"><?php echo $row['title']?></h5>
+                            <p class="card-text"><small class="text-body-secondary"><?php echo $row['author']?></small></p>
+                            <p class="card-text"><?php echo $row['annotation']?></p>
+                            <p>
+                                <?php
+                                for ($i=0; $i < $row['rating']; $i++) {
+                                    echo '<img src="assets/star-fill.svg" alt="full Star" style="margin-right: 10px;"/>';
+                                }
+                                for ($i = $row['rating']; $i < 5; $i++) {
+                                    echo '<img src="assets/star.svg" alt="empty Star"/>';
+                                }
+                                ?>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row justify-content-end">
+                                <div class="col-1">
+                                    <button type="button" id="editEntryBtn" class="btn" data-bs-toggle="modal" data-bs-target="#editModal">
+                                        <img src="assets/pen.svg" alt="editEntry"/>
+                                    </button>
+                                </div>
+                                <div class="col-1 me-5">
+                                    <button type="submit" id="deleteEntryBtn" name="deleteBook" class="btn">
+                                        <img src="assets/trash3-fill.svg" alt="editEntry"/>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+            }
+        ?>
     </div>
 </div>
 
