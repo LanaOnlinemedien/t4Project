@@ -83,7 +83,6 @@ $all_books = $conBooks -> query($pdo);
 <!-- output books -->
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <!-- wrapper book output -->
         <?php
             while($row = $all_books -> fetch(PDO::FETCH_BOTH)){
         ?>
@@ -104,7 +103,7 @@ $all_books = $conBooks -> query($pdo);
                                     echo '<img src="assets/star-fill.svg" alt="full Star" style="margin-right: 10px;"/>';
                                 }
                                 for ($i = $row['rating']; $i < 5; $i++) {
-                                    echo '<img src="assets/star.svg" alt="empty Star"/>';
+                                    echo '<img src="assets/star.svg" alt="empty Star" style="margin-right: 10px;"/>';
                                 }
                                 ?>
                             </p>
@@ -112,7 +111,7 @@ $all_books = $conBooks -> query($pdo);
                         <div class="card-footer">
                             <div class="row justify-content-end">
                                 <div class="col-1">
-                                    <button type="button" id="editEntryBtn" class="btn" data-bs-toggle="modal" data-bs-target="#editModal">
+                                    <button type="button" id="editEntryBtn" class="btn" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<?= $row['id']; ?>">
                                         <img src="assets/pen.svg" alt="editEntry"/>
                                     </button>
                                 </div>
@@ -136,72 +135,50 @@ $all_books = $conBooks -> query($pdo);
 <!-- Modal: add book -->
 <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createFormModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
+        <?php include 'createForm.php'?>
+    </div>
+</div>
+
+<!-- Modal: edit entry -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editFormModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="createFormModal">Buch hinzufügen</h1>
+                <h1 class="modal-title fs-5" id="editFormModal">Buch bearbeiten</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="createEntry" action="createForm.php" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col">
-                                    <label for="uploadCover">Cover hochladen</label>
-                                    <input type="file" accept=".jpg, .png, jpeg" class="form-control" id="cover" name="cover">
-                                </div>
-                                <div class="col">
-                                    <div class="row">
-                                        <div class="col">
-                                            <label for="title">Titel</label>
-                                            <input type="text" class="form-control" id="title" name="title" placeholder="Titel">
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col mt-2">
-                                            <label for="author">Autor</label>
-                                            <input type="text" class="form-control" id="author" name="author" placeholder="Autor">
-                                        </div>
-                                    </div>
-                                    <div class="row mt-2">
-                                        <div class="col">
-                                            <label for="rating">Sternebewertung</label>
-                                            <select id="rating" class="form-select" name="rating">
-                                                <option value="1">1 Stern</option>
-                                                <option value="2">2 Sterne</option>
-                                                <option value="3">3 Sterne</option>
-                                                <option value="4">4 Sterne</option>
-                                                <option value="5">5 Sterne</option>
-                                            </select>
-                                        </div>
-                                        <div class="col">
-                                            <label for="genre">Genre</label>
-                                            <input type="text" class="form-control" id="genre" name="genre" placeholder="Genre">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="container">
-                            <div class="row">
-                                <div class="col">
-                                    <label for="annotation">Anmerkungen</label>
-                                    <textarea class="form-control" id="annotation" name="annotation" placeholder="Anmerkungen"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                <?php include 'editForm.php'?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Schließen</button>
-                <button type="submit" name="saveBook" form="createEntry" class="btn btn-dark">Speichern</button>
+                <button type="submit" name="saveChanges" form="editEntry" class="btn btn-dark">Speichern</button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Content of Database displayed in form -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editButtons = document.querySelectorAll('#editEntryBtn');
+
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const bookId = this.getAttribute('data-id');
+                const modalBody = document.querySelector('#editModal .modal-body');
+
+                fetch(`editForm.php?id=${bookId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        modalBody.innerHTML = html;
+                    });
+            });
+        });
+    });
+</script>
+
 <script src="js/scripts.js"></script>
+<script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
