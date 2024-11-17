@@ -32,7 +32,7 @@ if(isset($_POST["saveBook"])){
     }
     if(!isset($error)){
         move_uploaded_file($file, $targetFile);
-        $query = "INSERT INTO books (cover,title, author, rating, genre, annotation) VALUES (:cover_path, :title, :author, :rating, :genre, :annotation)";
+        $query = "INSERT INTO books (cover, title, author, rating, genre, annotation) VALUES (:cover_path, :title, :author, :rating, :genre, :annotation)";
         $stmt = $conBooks->prepare($query);
         $stmt->bindParam(':cover_path', $newCoverName);
         $stmt->bindParam(':title', $title);

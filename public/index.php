@@ -4,6 +4,7 @@ session_start();
 require_once "../controller/dbCon.php";
 global $conBooks;
 
+
 $pdo = "SELECT * FROM books";
 $all_books = $conBooks -> query($pdo);
 ?>
@@ -110,15 +111,16 @@ $all_books = $conBooks -> query($pdo);
                         </div>
                         <div class="card-footer">
                             <div class="row justify-content-end">
-                                <div class="col-1">
+                                <div class="col-1 me-3">
                                     <button type="button" id="editEntryBtn" class="btn" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<?= $row['id']; ?>">
                                         <img src="assets/pen.svg" alt="editEntry"/>
                                     </button>
                                 </div>
                                 <div class="col-1 me-5">
-                                    <button type="submit" id="deleteEntryBtn" name="deleteBook" class="btn">
-                                        <img src="assets/trash3-fill.svg" alt="editEntry"/>
-                                    </button>
+                                    <form method="post" action="delete.php">
+                                        <button type="submit" id="deleteEntryBtn" name="deleteBook" class="btn" value="<?= $row['id'] ?>">
+                                            <img src="assets/trash3-fill.svg" alt="deleteEntry"/>
+                                        </button>
                                 </div>
                             </div>
                         </div>
@@ -153,6 +155,23 @@ $all_books = $conBooks -> query($pdo);
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Schließen</button>
                 <button type="submit" name="saveChanges" form="editEntry" class="btn btn-dark">Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: delete entry -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteFormModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteFormModal">Buch löschen</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <?php include 'delete.php' ?>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Schließen</button>
+                <button type="submit" name="deleteEntry" form="deleteEntry" class="btn btn-danger" value="<?= $row['id'] ?>">Löschen</button>
             </div>
         </div>
     </div>
