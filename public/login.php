@@ -1,14 +1,15 @@
 <?php
-    global $conUsers;
-    require("../controller/dbLogin.php");
+require("controller/dbCon.php");
+global $con;
 
-    $error = "";
+$error = "";
 
-    if(isset($_POST["submit"])){
-        $username = $_POST["username"];
-        $password = $_POST["password"];
+if (isset($_POST["login"])) {
+    $username = $_POST["username"];
+    $password = $_POST["password"];
 
-        $stmt = $conUsers->prepare("SELECT * FROM users WHERE username=:username");
+    try {
+        $stmt = $con->prepare("SELECT * FROM users WHERE username=:username");
         $stmt->bindParam(":username", $username);
         $stmt->execute();
 
@@ -19,30 +20,37 @@
 
             $checkPassword = password_verify($password, $passwordHashed);
 
-            if($checkPassword === false){
+            if ($checkPassword === false) {
                 $error = "Falsches Passwort";
-            }
-            if($checkPassword === true){
+            } elseif ($checkPassword === true) {
                 session_start();
                 $_SESSION["username"] = $userExists['username'];
-                header("Location:index.php");
+                $_SESSION['user_id'] = $userExists['user_id'];
+                header("Location: display.php");
                 exit();
             }
-        }
-        else {
+        } else {
             $error = "Der Benutzer existiert nicht.";
         }
+    } catch (PDOException $e) {
+        // Log or display a meaningful error message
+        $error = "Datenbankfehler: " . $e->getMessage();
+    } catch (Exception $e) {
+        // Catch other types of errors
+        $error = "Ein Fehler ist aufgetreten: " . $e->getMessage();
     }
+}
 ?>
+
 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <title>Login</title>
     <link href="css/custom.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
-<body>
+<body class="d-flex align-items-center justify-content-center vh-100">
 <div class="container">
     <div class="row">
         <div class="col text-center pt-3">
@@ -75,14 +83,16 @@
             </div>
         </div>
         <div class="row justify-content-center">
-            <div class="col-2 d-flex justify-content-center m-0.5 mt-2">
-                <button type="submit" name="submit" class="btn btn-outline-dark w-100">Login</button>
-            </div>
-            <div class="col-2 d-flex justify-content-center m-0.5 mt-2">
-                <button type="button" onclick="window.location.href='register.php'" name="register" class="btn btn-outline-dark w-100">Registrieren</button>
+            <div class="col-4 d-flex justify-content-center m-0.5 mt-2">
+                <button type="submit" name="login" class="btn btn-dark w-100">Login</button>
             </div>
         </div>
     </form>
+    <div class="row justify-content-center mt-2">
+        <div class="col-4 text-center">
+            <a href="register.php" class="text-decoration-none">Noch kein Konto? Jetzt Registrieren</a>
+        </div>
+    </div>
     <div class="row justify-content-center">
         <div class="col-4">
             <?php if ($error): ?>

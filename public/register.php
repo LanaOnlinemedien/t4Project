@@ -1,45 +1,70 @@
 <?php
-global $conUsers;
-require("../controller/dbLogin.php");
+require("controller/dbCon.php");
+session_start();
+global $con;
 
-    $error = "";
+$error = "";
 
-if(isset($_POST["submit"])){
-
+if (isset($_POST["register"])) {
     $username = $_POST["username"];
-    $password = PASSWORD_HASH($_POST["password"], PASSWORD_DEFAULT);
+    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
 
-    $stmt = $conUsers->prepare("SELECT * FROM users WHERE username=:username");
-    $stmt->bindParam(":username", $username);
-    $stmt->execute();
+    try {
+        $stmt = $con->prepare("SELECT * FROM users WHERE username=:username");
+        $stmt->bindParam(":username", $username);
+        $stmt->execute();
 
-    $userAlreadyExists = $stmt->fetchColumn();
+        $userAlreadyExists = $stmt->fetchColumn();
 
-    if(!$userAlreadyExists){
-        registerUser($username, $password);
-    } else{
-        $error = "Benutzer existiert bereits!";
+        if (!$userAlreadyExists) {
+            registerUser($username, $password);
+        } else {
+            $error = "Benutzer existiert bereits!";
+        }
+    } catch (PDOException $e) {
+        $error = "Datenbankfehler: " . $e->getMessage();
+    } catch (Exception $e) {
+        $error = "Ein unerwarteter Fehler ist aufgetreten: " . $e->getMessage();
     }
 }
-function registerUser($username, $password){
-    global $conUsers;
-    $stmt = $conUsers->prepare("INSERT INTO users(username, password) VALUES (:username, :password)");
-    $stmt->bindParam(":username", $username);
-    $stmt->bindParam(":password", $password);
-    $stmt->execute();
-    header("Location: index.php");
-}
 
+function registerUser($username, $password)
+{
+    global $con;
+
+    try {
+        $stmt = $con->prepare("INSERT INTO users(username, password) VALUES (:username, :password)");
+        $stmt->bindParam(":username", $username);
+        $stmt->bindParam(":password", $password);
+        $stmt->execute();
+
+        // Hol die ID des neu erstellten Benutzers
+        $user_id = $con->lastInsertId();
+
+        // user_id und username in der Session speichern
+        $_SESSION['user_id'] = $user_id;
+        $_SESSION['username'] = $username;
+
+        // Weiterleitung nach erfolgreicher Registrierung
+        header("Location: display.php");
+        exit();
+    } catch (PDOException $e) {
+        global $error;
+        $error = "Fehler beim Registrieren: " . $e->getMessage();
+    }
+}
 ?>
+
+
 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
     <link href="css/custom.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
-<body>
+<body class="d-flex align-items-center justify-content-center vh-100">
 <div class="container">
     <div class="row">
         <div class="col text-center pt-3">
@@ -72,17 +97,23 @@ function registerUser($username, $password){
             </div>
         </div>
         <div class="row justify-content-center">
-            <div class="col-2 d-flex justify-content-center m-0.5 mt-2">
-                <button type="submit" name="submit" class="btn btn-outline-dark w-100">Registrieren</button>
-            </div>
-            <div class="col-2 d-flex justify-content-center m-0.5 mt-2">
-                <button type="button" onclick="window.location.href='login.php'" name="login" class="btn btn-outline-dark w-100">Login</button>
+            <div class="col-4 d-flex justify-content-center m-0.5 mt-2">
+                <button type="submit" name="register" class="btn btn-dark w-100">Registrieren</button>
             </div>
         </div>
-                <?php if ($error): ?>
-                    <div class="error-message"><?= htmlspecialchars($error) ?></div>
-                <?php endif; ?>
     </form>
+    <div class="row justify-content-center mt-2">
+        <div class="col-4 text-center">
+            <a href="login.php" class="text-decoration-none">Bereits ein Konto? Login</a>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-4">
+            <?php if ($error): ?>
+                <div class="error-message"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 </body>
 </html>
