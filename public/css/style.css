@@ -9,5 +9,15 @@ body{
     font-weight: bold;
 }
 
+.container a {
+    color: #D87053;
+    text-decoration: none;
+}
+
+.container a:hover {
+    color: #C35E45;
+}
+
+
 
 
