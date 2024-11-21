@@ -3,8 +3,8 @@ session_start();
 require "controller/dbCon.php";
 global $con;
 
-$error = ""; // Variable für Fehler
-$success = ""; // Variable für Erfolgsmeldungen
+$error = "";
+$success = "";
 
 if (isset($_POST["create"])) {
     $title = $_POST["title"];
@@ -21,10 +21,8 @@ if (isset($_POST["create"])) {
     $newCoverName = uniqid() . '.' . $imageFiletype;
     $targetFile = $folder . $newCoverName;
 
-    // Überprüfen, ob der Benutzer eingeloggt ist
     if (!isset($_SESSION['user_id'])) {
         $error = "Fehler: Benutzer ist nicht eingeloggt.";
-        // Optionale Weiterleitung zur Login-Seite
         header("location:login.php");
         exit();
     }
@@ -32,22 +30,18 @@ if (isset($_POST["create"])) {
     $user_id = $_SESSION['user_id'];
 
     try {
-        // Überprüfe Dateiformat
         if (!in_array($imageFiletype, ["jpg", "png", "jpeg"])) {
             throw new Exception("Falsches Dateiformat! Nur JPG, PNG und JPEG sind erlaubt.");
         }
 
-        // Überprüfe Dateigröße
         if ($_FILES["cover"]["size"] > 10000000) {
             throw new Exception("Bild zu groß! Maximal 10 MB erlaubt.");
         }
 
-        // Bild verschieben
         if (!move_uploaded_file($file, $targetFile)) {
             throw new Exception("Fehler beim Hochladen der Datei.");
         }
 
-        // Datenbankeintrag erstellen
         $query = "INSERT INTO books (user_id, cover, title, author, rating, genre, annotation) 
                   VALUES (:user_id, :cover_path, :title, :author, :rating, :genre, :annotation)";
         $stmt = $con->prepare($query);
@@ -65,7 +59,6 @@ if (isset($_POST["create"])) {
             throw new Exception("Eintrag konnte nicht erstellt werden.");
         }
 
-        // Weiterleitung
         header("location:display.php");
         exit();
 
@@ -98,25 +91,25 @@ if (isset($_POST["create"])) {
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="cover" class="form-label">Cover hochladen</label>
-                                    <input type="file" id="cover" name="cover" class="form-control mb-2" accept=".jpg, .png, .jpeg">
+                                    <input type="file" id="cover" name="cover" class="form-control mb-2" accept=".jpg, .png, .jpeg" required>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="title" class="form-label">Titel</label>
-                                    <input type="text" id="title" name="title" class="form-control" placeholder="Titel">
+                                    <input type="text" id="title" name="title" class="form-control" placeholder="Titel" required>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="author" class="form-label">Autor</label>
-                                    <input type="text" id="author" name="author" class="form-control" placeholder="Autor">
+                                    <input type="text" id="author" name="author" class="form-control" placeholder="Autor" required>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-6">
                                     <label for="rating" class="form-label">Sternebewertung</label>
-                                    <select id="rating" name="rating" class="form-select">
+                                    <select id="rating" name="rating" class="form-select" required>
                                         <option value="1">1 Stern</option>
                                         <option value="2">2 Sterne</option>
                                         <option value="3">3 Sterne</option>
@@ -126,7 +119,7 @@ if (isset($_POST["create"])) {
                                 </div>
                                 <div class="col-6">
                                     <label for="genre" class="form-label">Genre</label>
-                                    <input type="text" id="genre" name="genre" class="form-control" placeholder="Genre">
+                                    <input type="text" id="genre" name="genre" class="form-control" placeholder="Genre" required>
                                 </div>
                             </div>
                         </div>

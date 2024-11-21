@@ -1,26 +1,26 @@
 <?php
 session_start();
 
-require_once "controller/dbCon.php";
+require "controller/dbCon.php";
+require "search.php";
 global $con;
 
-// Überprüfe, ob der Nutzer eingeloggt ist
+
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // Umleiten, falls nicht eingeloggt
+    header("Location: login.php");
     exit();
 }
 
-// Hole die user_id aus der Session
 $user_id = $_SESSION['user_id'];
 
-// Bereite die SQL-Abfrage vor, um nur Bücher des aktuellen Nutzers zu laden
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+
 $stmt = $con->prepare("SELECT * FROM books WHERE user_id = :user_id");
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
 
-// Bücher des Nutzers abrufen
 $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+$all_books = searchBooks($search, $user_id, $con);
 
 ?>
 
@@ -60,48 +60,42 @@ $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
         <div class="row justify-content-center d-flex align-items-center mt-1">
-            <div class="col-1">
-                <button type="button" id="addEntryBtn" class="btn" onclick="window.location.href='create.php'">
-                    <img src="assets/plus.svg" alt="createEntry"/>
+            <div class="col-1 d-flex justify-content-center">
+                <button type="button" id="addEntryBtn" class="btn p-0 m-0" onclick="window.location.href='create.php'">
+                    <img src="assets/plus.svg" alt="createEntry" class="img-fluid"/>
                 </button>
             </div>
             <div class="col-8 d-flex align-items-center">
-                <div class="input-group">
-                    <label for="search"></label>
-                    <input
-                        type="search"
-                        class="form-control"
-                        name="search"
-                        id="search"
-                        autocomplete="off"
-                    >
-                    <div class="input-group-append">
-                            <span class="input-group-text">
-                                <img src="assets/search-heart.svg" alt="search"/>
-                            </span>
+                <form method="GET" action="display.php" class="w-100">
+                    <div class="input-group">
+                        <input
+                                type="search"
+                                class="form-control"
+                                name="search"
+                                id="search"
+                                placeholder="Suche nach Büchern"
+                                autocomplete="off"
+                        />
+                        <button type="submit" class="btn btn-white">
+                            <img src="assets/search-heart.svg" alt="search" />
+                        </button>
                     </div>
-                </div>
+                </form>
             </div>
-            <div class="col-1">
-                <div class="dropdown">
-                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="assets/funnel.svg" alt="filter"/>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
-                </div>
+            <div class="col-1 d-flex justify-content-center">
+                <button onclick="window.location.href='display.php'" type="button" class="btn p-0 m-0">
+                    <img src="assets/x.svg" alt="back" class="img-fluid"/>
+                </button>
             </div>
         </div>
     </div>
+
     <!-- error-messages, success-messages, messages-->
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-10">
                 <?php
-                // Erfolgsmeldung anzeigen
+                // success
                 if (isset($_SESSION['message'])) {
                     echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
                     ' . htmlspecialchars($_SESSION['message'], ENT_QUOTES, 'UTF-8') . '
@@ -110,7 +104,7 @@ $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     unset($_SESSION['message']);
                 }
 
-                // Fehlermeldung anzeigen
+                // error
                 if (isset($_SESSION['error'])) {
                     echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                     ' . htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') . '
@@ -119,7 +113,7 @@ $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     unset($_SESSION['error']);
                 }
 
-                // Erfolgsmeldung anzeigen
+                // success
                 if (isset($_SESSION['success'])) {
                     echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
                     ' . htmlspecialchars($_SESSION['success'], ENT_QUOTES, 'UTF-8') . '
@@ -133,27 +127,27 @@ $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <!-- display books-->
-    <div class="container mt-4">
+    <div class="container mt-2">
         <div class="row justify-content-center">
-            <?php foreach ($all_books as $row) {
-                ?>
+            <?php if (!empty($all_books)): ?>
+            <?php foreach ($all_books as $book): ?>
             <div class="col-5">
                 <div class="card mb-3">
                     <div class="row g-0">
                         <div class="col-3">
-                            <img id="imageCover" src="cover/<?php echo $row['cover'] ?>" class="img-fluid rounded-start h-100" alt="cover" style="object-fit: cover">
+                            <img id="imageCover" src="cover/<?php echo $book['cover'] ?>" class="img-fluid rounded-start h-100" alt="cover" style="object-fit: cover">
                         </div>
                         <div class="col-9">
                             <div class="card-body">
-                                <h5 class="card-title"><?php echo $row['title']?></h5>
-                                <p class="card-text"><small class="text-body-secondary"><?php echo $row['author']?></small></p>
-                                <p class="card-text"><?php echo $row['annotation']?></p>
+                                <h5 class="card-title"><?php echo $book['title']?></h5>
+                                <p class="card-text"><small class="text-body-secondary"><?php echo $book['author']?></small></p>
+                                <p class="card-text"><?php echo $book['annotation']?></p>
                                 <p>
                                     <?php
-                                    for ($i=0; $i < $row['rating']; $i++) {
+                                    for ($i=0; $i < $book['rating']; $i++) {
                                         echo '<img src="assets/star-fill.svg" alt="full Star" style="margin-right: 10px;"/>';
                                     }
-                                    for ($i = $row['rating']; $i < 5; $i++) {
+                                    for ($i = $book['rating']; $i < 5; $i++) {
                                         echo '<img src="assets/star.svg" alt="empty Star" style="margin-right: 10px;"/>';
                                     }
                                     ?>
@@ -162,19 +156,18 @@ $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <div class="card-footer">
                                 <div class="row justify-content-end">
                                     <div class="col-1 me-3">
-                                        <button type="button" id="editEntryBtn" class="btn" onclick="window.location.href='update.php?book_id=<?php echo htmlspecialchars($row['book_id'], ENT_QUOTES, 'UTF-8'); ?>'">
+                                        <button type="button" id="editEntryBtn" class="btn" onclick="window.location.href='update.php?book_id=<?php echo htmlspecialchars($book['book_id'], ENT_QUOTES, 'UTF-8'); ?>'">
                                             <img src="assets/pen.svg" alt="editEntry"/>
                                         </button>
 
                                     </div>
                                     <div class="col-1 me-5">
                                         <form method="post" action="delete.php">
-                                            <input type="hidden" name="book_id" value="<?php echo htmlspecialchars($row['book_id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <input type="hidden" name="book_id" value="<?php echo htmlspecialchars($book['book_id'], ENT_QUOTES, 'UTF-8'); ?>">
                                             <button type="submit" id="deleteEntryBtn" name="deleteBook" class="btn">
                                                 <img src="assets/trash3-fill.svg" alt="deleteEntry" />
                                             </button>
                                         </form>
-
                                     </div>
                                 </div>
                             </div>
@@ -182,13 +175,13 @@ $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
             </div>
-            <?php
-            }
-            ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="text-center">Keine Ergebnisse gefunden.</p>
+            <?php endif; ?>
         </div>
     </div>
 
-<script src="js/scripts.js"></script>
 <script src="js/bootstrap.bundle.min.js"></script>
 
 </body>

@@ -27,5 +27,21 @@
             </div>
         </div>
     </header>
+    <div class="container mt-5">
+        <div class="row d-flex align-items-center">
+            <div class="col justify-content-center">
+                <h3>Willkommen bei Booknook!</h3>
+                <p>Verwalten Sie Ihre Büchersammlung mühelos:</p>
+                <p>Speichern, bewerten und organisieren Sie Ihre Lieblingsbücher an einem Ort.</p>
+                <p>Ihr digitales Bücherregal für mehr Übersicht und Inspiration!</p>
+                <button type="button" class="btn btn-outline-dark" onclick="window.location.href='login.php'">
+                    Zur Anmeldung
+                </button>
+            </div>
+            <div class="col">
+                <img src="assets/bookelement_short.svg" alt=""/>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

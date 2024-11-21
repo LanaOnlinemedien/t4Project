@@ -3,34 +3,28 @@ session_start();
 require 'controller/dbCon.php';
 global $con;
 
-// Fehler-Variable initialisieren
 $error = '';
 
 try {
-    // Überprüfen, ob der Benutzer eingeloggt ist
     if (!isset($_SESSION['user_id'])) {
         throw new Exception('Sie müssen eingeloggt sein, um ein Buch zu bearbeiten.');
     }
 
-    $user_id = $_SESSION['user_id']; // Aktive Benutzer-ID
+    $user_id = $_SESSION['user_id'];
 
-    // Buch-ID aus GET oder POST lesen
     $book_id = null;
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        // Beim ersten Laden der Seite die Buch-ID aus GET holen
         if (!isset($_GET['book_id']) || empty($_GET['book_id'])) {
             throw new Exception('Buch-ID fehlt. Bitte gehen Sie zurück und versuchen Sie es erneut.');
         }
         $book_id = (int)$_GET['book_id'];
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Beim Absenden des Formulars die Buch-ID aus POST holen
         if (!isset($_POST['book_id']) || empty($_POST['book_id'])) {
             throw new Exception('Buch-ID fehlt. Das Update kann nicht durchgeführt werden.');
         }
         $book_id = (int)$_POST['book_id'];
     }
 
-    // Buch-Daten aus der Datenbank abrufen
     $query = "SELECT * FROM books WHERE book_id = :book_id AND user_id = :user_id";
     $stmt = $con->prepare($query);
     $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
@@ -42,25 +36,23 @@ try {
         throw new Exception('Das Buch wurde nicht gefunden oder Sie sind nicht berechtigt, es zu bearbeiten.');
     }
 
-    // Wenn das Formular abgesendet wurde (POST)
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Werte aus dem Formular lesen
+
         $title = isset($_POST['title']) ? $_POST['title'] : $book['title'];
         $author = isset($_POST['author']) ? $_POST['author'] : $book['author'];
         $rating = (int)(isset($_POST['rating']) ? $_POST['rating'] : $book['rating']);
         $genre = isset($_POST['genre']) ? $_POST['genre'] : $book['genre'];
         $annotation = isset($_POST['annotation']) ? $_POST['annotation'] : $book['annotation'];
 
-        // Cover-Upload
         $folder = "cover/";
-        $coverPath = $book['cover']; // Standardmäßig das bestehende Cover verwenden
+        $coverPath = $book['cover'];
 
         if (isset($_FILES['cover']) && $_FILES['cover']['error'] === UPLOAD_ERR_OK) {
             $coverFile = $_FILES['cover']['name'];
             $file = $_FILES['cover']['tmp_name'];
             $imageFiletype = strtolower(pathinfo($coverFile, PATHINFO_EXTENSION));
 
-            // Überprüfen, ob das hochgeladene Bild ein gültiges Format hat
             if (!in_array($imageFiletype, ['jpg', 'jpeg', 'png'])) {
                 throw new Exception('Falsches Dateiformat! Erlaubt sind nur JPG, JPEG und PNG.');
             }
@@ -68,12 +60,10 @@ try {
                 throw new Exception('Bild ist zu groß! Maximale Größe: 10 MB.');
             }
 
-            // Altes Cover löschen, wenn vorhanden
             if (!empty($book['cover']) && file_exists($folder . $book['cover'])) {
                 unlink($folder . $book['cover']);
             }
 
-            // Neues Cover speichern
             $newCoverName = uniqid() . '.' . $imageFiletype;
             if (!move_uploaded_file($file, $folder . $newCoverName)) {
                 throw new Exception('Fehler beim Hochladen des Bildes.');
@@ -81,7 +71,6 @@ try {
             $coverPath = $newCoverName;
         }
 
-        // Buch in der Datenbank aktualisieren
         $updateQuery = "UPDATE books 
                         SET title = :title, author = :author, rating = :rating, genre = :genre, annotation = :annotation, cover = :cover 
                         WHERE book_id = :book_id AND user_id = :user_id";
