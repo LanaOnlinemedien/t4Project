@@ -94,12 +94,13 @@ if (isset($_POST["create"])) {
             <div class="form-group">
                 <div class="container">
                     <div class="row justify-content-center">
-                        <div class="col-4">
-                            <label for="cover" class="form-label">Cover hochladen</label>
-                                <input type="file" id="cover" name="cover" class="form-control mb-2" accept=".jpg, .png, .jpeg">
-                        </div>
-
-                        <div class="col-4">
+                        <div class="col-8">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="cover" class="form-label">Cover hochladen</label>
+                                    <input type="file" id="cover" name="cover" class="form-control mb-2" accept=".jpg, .png, .jpeg">
+                                </div>
+                            </div>
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="title" class="form-label">Titel</label>
@@ -131,7 +132,7 @@ if (isset($_POST["create"])) {
                         </div>
                     </div>
                 </div>
-                <div class="container">
+                <div class="container mt-3">
                     <div class="row justify-content-center">
                         <div class="col-8">
                             <label for="annotation">Anmerkungen</label>
@@ -139,7 +140,7 @@ if (isset($_POST["create"])) {
                         </div>
                     </div>
                 </div>
-                <div class="container mt-2">
+                <div class="container mt-3">
                     <div class="row justify-content-center">
                         <div class="col-4">
                             <button type="button" class="btn btn-outline-dark w-100" onclick="window.location.href='display.php'">Schließen</button>

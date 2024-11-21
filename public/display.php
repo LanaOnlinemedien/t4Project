@@ -1,5 +1,27 @@
 <?php
+session_start();
+
+require_once "controller/dbCon.php";
+global $con;
+
+// Überprüfe, ob der Nutzer eingeloggt ist
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php"); // Umleiten, falls nicht eingeloggt
+    exit();
+}
+
+// Hole die user_id aus der Session
+$user_id = $_SESSION['user_id'];
+
+// Bereite die SQL-Abfrage vor, um nur Bücher des aktuellen Nutzers zu laden
+$pdo = $con->prepare("SELECT * FROM books WHERE user_id = :user_id");
+$pdo->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$pdo->execute();
+
+// Bücher des Nutzers abrufen
+$all_books = $pdo->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <html lang="en">
 <head>
@@ -72,4 +94,60 @@
         </div>
     </div>
 </div>
+
+<!-- display books-->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <?php foreach ($all_books as $row) {
+            ?>
+        <div class="col-5">
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-3">
+                        <img id="imageCover" src="cover/<?php echo $row['cover'] ?>" class="img-fluid rounded-start h-100" alt="cover" style="object-fit: cover">
+                    </div>
+                    <div class="col-9">
+                        <div class="card-body">
+                            <h5 class="card-title"><?php echo $row['title']?></h5>
+                            <p class="card-text"><small class="text-body-secondary"><?php echo $row['author']?></small></p>
+                            <p class="card-text"><?php echo $row['annotation']?></p>
+                            <p>
+                                <?php
+                                for ($i=0; $i < $row['rating']; $i++) {
+                                    echo '<img src="assets/star-fill.svg" alt="full Star" style="margin-right: 10px;"/>';
+                                }
+                                for ($i = $row['rating']; $i < 5; $i++) {
+                                    echo '<img src="assets/star.svg" alt="empty Star" style="margin-right: 10px;"/>';
+                                }
+                                ?>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row justify-content-end">
+                                <div class="col-1 me-3">
+                                    <button type="button" id="editEntryBtn" class="btn" onclick="window.location.href='update.php'">
+                                        <img src="assets/pen.svg" alt="editEntry"/>
+                                    </button>
+                                </div>
+                                <div class="col-1 me-5">
+                                    <form method="post" action="delete.php">
+                                        <button type="submit" id="deleteEntryBtn" name="deleteBook" class="btn">
+                                            <img src="assets/trash3-fill.svg" alt="deleteEntry"/>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+}
+?>
+    </div>
+</div>
+
+</body>
+</html>
 
