@@ -20,6 +20,8 @@ $stmt->execute();
 
 // Bücher des Nutzers abrufen
 $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 ?>
 
 
@@ -49,105 +51,145 @@ $all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </header>
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-8">
-            <object type="image/svg+xml" data="assets/bookelement.svg">
-                <img src="assets/bookelement.svg" alt=""/>
-            </object>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-8">
+                <object type="image/svg+xml" data="assets/bookelement.svg">
+                    <img src="assets/bookelement.svg" alt=""/>
+                </object>
+            </div>
         </div>
-    </div>
-    <div class="row justify-content-center d-flex align-items-center mt-1">
-        <div class="col-1">
-            <button type="button" id="addEntryBtn" class="btn" onclick="window.location.href='create.php'">
-                <img src="assets/plus.svg" alt="createEntry"/>
-            </button>
-        </div>
-        <div class="col-8 d-flex align-items-center">
-            <div class="input-group">
-                <label for="search"></label>
-                <input
-                    type="search"
-                    class="form-control"
-                    name="search"
-                    id="search"
-                    autocomplete="off"
-                >
-                <div class="input-group-append">
-                        <span class="input-group-text">
-                            <img src="assets/search-heart.svg" alt="search"/>
-                        </span>
+        <div class="row justify-content-center d-flex align-items-center mt-1">
+            <div class="col-1">
+                <button type="button" id="addEntryBtn" class="btn" onclick="window.location.href='create.php'">
+                    <img src="assets/plus.svg" alt="createEntry"/>
+                </button>
+            </div>
+            <div class="col-8 d-flex align-items-center">
+                <div class="input-group">
+                    <label for="search"></label>
+                    <input
+                        type="search"
+                        class="form-control"
+                        name="search"
+                        id="search"
+                        autocomplete="off"
+                    >
+                    <div class="input-group-append">
+                            <span class="input-group-text">
+                                <img src="assets/search-heart.svg" alt="search"/>
+                            </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1">
+                <div class="dropdown">
+                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="assets/funnel.svg" alt="filter"/>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="col-1">
-            <div class="dropdown">
-                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="assets/funnel.svg" alt="filter"/>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                </ul>
+    </div>
+    <!-- error-messages, success-messages, messages-->
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col-10">
+                <?php
+                // Erfolgsmeldung anzeigen
+                if (isset($_SESSION['message'])) {
+                    echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ' . htmlspecialchars($_SESSION['message'], ENT_QUOTES, 'UTF-8') . '
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>';
+                    unset($_SESSION['message']);
+                }
+
+                // Fehlermeldung anzeigen
+                if (isset($_SESSION['error'])) {
+                    echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    ' . htmlspecialchars($_SESSION['error'], ENT_QUOTES, 'UTF-8') . '
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>';
+                    unset($_SESSION['error']);
+                }
+
+                // Erfolgsmeldung anzeigen
+                if (isset($_SESSION['success'])) {
+                    echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ' . htmlspecialchars($_SESSION['success'], ENT_QUOTES, 'UTF-8') . '
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>';
+                    unset($_SESSION['success']);
+                }
+                ?>
             </div>
         </div>
     </div>
-</div>
 
-<!-- display books-->
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <?php foreach ($all_books as $row) {
-            ?>
-        <div class="col-5">
-            <div class="card mb-3">
-                <div class="row g-0">
-                    <div class="col-3">
-                        <img id="imageCover" src="cover/<?php echo $row['cover'] ?>" class="img-fluid rounded-start h-100" alt="cover" style="object-fit: cover">
-                    </div>
-                    <div class="col-9">
-                        <div class="card-body">
-                            <h5 class="card-title"><?php echo $row['title']?></h5>
-                            <p class="card-text"><small class="text-body-secondary"><?php echo $row['author']?></small></p>
-                            <p class="card-text"><?php echo $row['annotation']?></p>
-                            <p>
-                                <?php
-                                for ($i=0; $i < $row['rating']; $i++) {
-                                    echo '<img src="assets/star-fill.svg" alt="full Star" style="margin-right: 10px;"/>';
-                                }
-                                for ($i = $row['rating']; $i < 5; $i++) {
-                                    echo '<img src="assets/star.svg" alt="empty Star" style="margin-right: 10px;"/>';
-                                }
-                                ?>
-                            </p>
+    <!-- display books-->
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <?php foreach ($all_books as $row) {
+                ?>
+            <div class="col-5">
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-3">
+                            <img id="imageCover" src="cover/<?php echo $row['cover'] ?>" class="img-fluid rounded-start h-100" alt="cover" style="object-fit: cover">
                         </div>
-                        <div class="card-footer">
-                            <div class="row justify-content-end">
-                                <div class="col-1 me-3">
-                                    <button type="button" id="editEntryBtn" class="btn" onclick="window.location.href='update.php?book_id=<?php echo htmlspecialchars($row['book_id'], ENT_QUOTES, 'UTF-8'); ?>'">
-                                        <img src="assets/pen.svg" alt="editEntry"/>
-                                    </button>
-
-                                </div>
-                                <div class="col-1 me-5">
-                                    <form method="post" action="delete.php">
-                                        <button type="submit" id="deleteEntryBtn" name="deleteBook" class="btn">
-                                            <img src="assets/trash3-fill.svg" alt="deleteEntry"/>
+                        <div class="col-9">
+                            <div class="card-body">
+                                <h5 class="card-title"><?php echo $row['title']?></h5>
+                                <p class="card-text"><small class="text-body-secondary"><?php echo $row['author']?></small></p>
+                                <p class="card-text"><?php echo $row['annotation']?></p>
+                                <p>
+                                    <?php
+                                    for ($i=0; $i < $row['rating']; $i++) {
+                                        echo '<img src="assets/star-fill.svg" alt="full Star" style="margin-right: 10px;"/>';
+                                    }
+                                    for ($i = $row['rating']; $i < 5; $i++) {
+                                        echo '<img src="assets/star.svg" alt="empty Star" style="margin-right: 10px;"/>';
+                                    }
+                                    ?>
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row justify-content-end">
+                                    <div class="col-1 me-3">
+                                        <button type="button" id="editEntryBtn" class="btn" onclick="window.location.href='update.php?book_id=<?php echo htmlspecialchars($row['book_id'], ENT_QUOTES, 'UTF-8'); ?>'">
+                                            <img src="assets/pen.svg" alt="editEntry"/>
                                         </button>
-                                    </form>
+
+                                    </div>
+                                    <div class="col-1 me-5">
+                                        <form method="post" action="delete.php">
+                                            <input type="hidden" name="book_id" value="<?php echo htmlspecialchars($row['book_id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <button type="submit" id="deleteEntryBtn" name="deleteBook" class="btn">
+                                                <img src="assets/trash3-fill.svg" alt="deleteEntry" />
+                                            </button>
+                                        </form>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <?php
+            }
+            ?>
         </div>
-        <?php
-        }
-        ?>
     </div>
-</div>
+
+<script src="js/scripts.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
