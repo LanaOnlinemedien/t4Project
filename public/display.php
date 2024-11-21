@@ -14,12 +14,12 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 // Bereite die SQL-Abfrage vor, um nur Bücher des aktuellen Nutzers zu laden
-$pdo = $con->prepare("SELECT * FROM books WHERE user_id = :user_id");
-$pdo->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-$pdo->execute();
+$stmt = $con->prepare("SELECT * FROM books WHERE user_id = :user_id");
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
 
 // Bücher des Nutzers abrufen
-$all_books = $pdo->fetchAll(PDO::FETCH_ASSOC);
+$all_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 
@@ -125,9 +125,10 @@ $all_books = $pdo->fetchAll(PDO::FETCH_ASSOC);
                         <div class="card-footer">
                             <div class="row justify-content-end">
                                 <div class="col-1 me-3">
-                                    <button type="button" id="editEntryBtn" class="btn" onclick="window.location.href='update.php'">
+                                    <button type="button" id="editEntryBtn" class="btn" onclick="window.location.href='update.php?book_id=<?php echo htmlspecialchars($row['book_id'], ENT_QUOTES, 'UTF-8'); ?>'">
                                         <img src="assets/pen.svg" alt="editEntry"/>
                                     </button>
+
                                 </div>
                                 <div class="col-1 me-5">
                                     <form method="post" action="delete.php">
@@ -143,8 +144,8 @@ $all_books = $pdo->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
         <?php
-}
-?>
+        }
+        ?>
     </div>
 </div>
 
