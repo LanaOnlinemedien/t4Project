@@ -1,5 +1,5 @@
 ## Voraussetzungen
-- Docker und Docker-Compose installiert.
+- Docker und Docker-Compose installiert und Docker gestartet.
 - DBeaver installiert.
 
 ## Installation und Start
@@ -26,7 +26,7 @@
 Klicke auf "Verbindung testen" ggf. Treiberdateien herunterladen, anschließend auf fertigstellen
 
 5. SQL-Skript in Datenbank booknook ausführen:
-- sql-Skript aus controller/setup.sql kopieren, in DBeaver einfügen und ausführen, um Tabellen zu erstellen
+- sql-Skript aus controller/setup.sql kopieren, in DBeaver innerhalb der Database booknook einfügen und ausführen, um Tabellen zu erstellen
 6. Öffne die Webanwendung im Browser:
     ```bash
    http://localhost:8080

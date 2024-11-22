@@ -9,12 +9,12 @@ CREATE TABLE users (
 CREATE TABLE books (
                        book_id INT AUTO_INCREMENT PRIMARY KEY,
                        user_id INT NOT NULL,
-                       cover VARCHAR(255),
-                       title VARCHAR(255) NOT NULL,
+                       cover VARCHAR(60),
+                       title VARCHAR(255),
                        author VARCHAR(255),
                        rating INT,
                        genre VARCHAR(255),
                        annotation TEXT,
-                       FOREIGN KEY (user_id) REFERENCES users(user_id)
+                       FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
